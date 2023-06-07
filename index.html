@@ -1,0 +1,36 @@
+<html>
+  <head> </head>
+  <body>
+    <input type="file" onchange="unzip(this.files);">
+
+    <script>
+      function unzip(files) {
+        var file = files[0];
+
+        var reader = new FileReader();
+        reader.onload = function (event) {
+          var zip = new JSZip();
+          zip.loadAsync(event.target.result).then(function (zip) {
+            var filePromises = [];
+
+            Object.keys(zip.files).forEach(function (filename) {
+              var file = zip.files[filename];
+              if (!file.dir) {
+                filePromises.push(
+                  file.async('blob').then(function (blob) {
+                    var a = document.createElement('a');
+                    a.href = window.URL.createObjectURL(blob);
+                    a.download = filename;
+                    a.click();
+                  })
+                )
+              }
+            })
+          })
+        }
+        reader.readAsArrayBuffer(file);
+      }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js"></script>
+  </body>
+</html>
